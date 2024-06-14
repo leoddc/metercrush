@@ -55,13 +55,33 @@ class Grid {
     constructor(bar, bpm) {
         this.bar = bar;
         this.notes = this.bar.notes;
-        this.currentNote = this.notes[0];
         this.set = [];
+        this.buffer = 500; // milliseconds
+        this.completed = false;
+        this.started = false;
+        this.place = 0;
         this.hitting = false;
         this.wholeFactor = (240 / bpm) * 1000; // the length of a whole note in milliseconds (60 / bpm * 4)
         this.metronome = new Metronome(bpm, () => {
-            console.log("metronome hit");
+            if (this.completed) {
+                console.log("completed");
+            }
+            console.log("metronome hit", this.place);
         });
+    }
+
+    next() {
+        this.place++;
+        if (this.place === this.set.length) {
+            this.completed = true;
+        }
+
+    }
+
+    mistake() {
+        this.place = 0;
+        this.started = false;
+        this.set = [];
     }
 
     checkDistance(start, end) {

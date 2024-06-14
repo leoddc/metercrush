@@ -13,6 +13,10 @@ class Bar {
         this.notes.push(note);
     }
 
+    addQuarterNote() {
+        this.addNote(new Note(1, 4));
+    }
+
     sumNotes() {
         let sum = new Fraction(0, 1);
         for (let note of this.notes) {
