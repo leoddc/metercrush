@@ -1,21 +1,13 @@
-class AudioController extends EventEmitter {
+class AudioController {
     constructor(audioCtx) {
-        super();
         this.audioCtx = audioCtx;
+        this.metronomeSound = new Howl({
+            src: ['audio/met-tik.wav']
+        });
     }
 
     playClick() {
-        const oscillator = this.audioCtx.createOscillator();
-        const gainNode = this.audioCtx.createGain();
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-
-        oscillator.frequency.value = 1000;
-        gainNode.gain.value = 1;
-
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.1);
+        this.metronomeSound.play();
     }
 }
 
@@ -62,10 +54,12 @@ class Grid {
         this.place = 0;
         this.hitting = false;
         this.wholeFactor = (240 / bpm) * 1000; // the length of a whole note in milliseconds (60 / bpm * 4)
+        this.audioController = new AudioController(window.AudioContext);
         this.metronome = new Metronome(bpm, () => {
             if (this.completed) {
                 console.log("completed");
             }
+            this.audioController.playClick();
             console.log("metronome hit", this.place);
         });
     }

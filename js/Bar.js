@@ -17,6 +17,10 @@ class Bar {
         this.addNote(new Note(1, 4));
     }
 
+    addQuarterRest() {
+        this.addNote(new Rest(1, 4));
+    }
+
     sumNotes() {
         let sum = new Fraction(0, 1);
         for (let note of this.notes) {

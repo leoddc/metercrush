@@ -6,13 +6,12 @@
     <title>Document</title>
 </head>
 <body>
-    <button onclick="playBar(bar, 120)">Play</button>
+    <button onclick="startGame()">Play</button>
+    <button onclick="stopGame()">Stop</button>
     <div id="metronome-visualizer" style="background-color: red; display: block; width: 20px; height: 20px;"></div>
-    <form action="">
-
-    </form>
     <div id="vex"></div>
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js" integrity="sha512-xi/RZRIF/S0hJ+yJJYuZ5yk6/8pCiRlEXZzoguSMl+vk2i3m6UjUO/WcZ11blRL/O+rnj94JRGwt/CHbc9+6EA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="js/EventEmitter.js"></script>
     <script src="js/AudioController.js"></script>
     <script src="js/Fraction.js"></script>
@@ -20,6 +19,7 @@
     <script src="js/Rest.js"></script>
     <script src="js/Bar.js"></script>
     <script src="js/BarGenerator.js"></script>
+    <script src="js/MeterCrush.js"></script>
     <script src="js/script.js"></script>
 </body>
 </html>
