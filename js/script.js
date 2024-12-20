@@ -6,7 +6,7 @@ let generatorConfig = {
 };
 
 let barConfig = [4, 4];
-let bpm = 120;
+let bpm = 100;
 
 let meterCrush = new MeterCrush(generatorConfig, barConfig, bpm);
 

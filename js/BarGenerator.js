@@ -26,7 +26,6 @@ class BarGenerator {
             count++;
 
             if (count > 50) {
-                console.log("Emergency bar");
                 bar.clear();
                 currentSum = new Fraction(0, 1);
                 firstNote = true;

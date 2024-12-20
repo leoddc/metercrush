@@ -5,6 +5,20 @@ class MeterCrush {
         this.gridBpm = gridBpm;
         this.grid = null;
         this.spacePressed = false;
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        this.audioController = new AudioController(audioCtx);
+
+        this.isRest = false; // New flag to track if the current note is a rest
+        this.restTimeout = null; // To handle rest progression
+
+        this.metronome = new Metronome(this.gridBpm, () => {
+            if (this.grid) {
+                this.audioController.playClick();
+                this.handleMetronomeTick();
+            }
+        });
+
         this.initEventListeners();
     }
 
@@ -19,56 +33,86 @@ class MeterCrush {
         document.addEventListener('keyup', (event) => {
             if (event.code === 'Space') {
                 this.spacePressed = false;
-                console.log('Space key released');
             }
         });
     }
 
     startGame() {
-        console.log("STARTING GAME");
         this.generateNewBar();
     }
 
     stopGame() {
-        console.log("STOPPING GAME");
         this.grid = null;
+        this.metronome.stop();
     }
 
     generateNewBar() {
-        // let bar = this.generator.generateBar(this.barConfig);
-        let bar = new Bar(this.barConfig);
-        bar.addQuarterNote();
-        bar.addQuarterNote();
-        bar.addQuarterRest();
-        bar.addQuarterNote();
+        let bar = this.generator.generateBar(this.barConfig);
+        // let bar = new Bar(this.barConfig);
+        // bar.addQuarterNote();
+        // bar.addQuarterNote();
+        // bar.addQuarterRest();
+        // bar.addQuarterNote();
         bar.engrave("vex");
 
-        this.grid = new Grid(bar, this.gridBpm);
+        this.grid = new Grid(bar, this.gridBpm, this.metronome, this.audioController);
         this.grid.generateGrid();
         this.grid.started = true;
-        console.log("NEW BAR GENERATED");
+    }
+
+    handleMetronomeTick() {
+        if (!this.grid) return;
+
+        const currentNote = this.grid.set[this.grid.place];
+        if (!currentNote) return;
+
+        this.isRest = currentNote.quiet;
+
+        if (this.isRest) {
+            this.startRestTimeout(currentNote);
+        } else {
+            this.clearRestTimeout();
+        }
     }
 
     handleSpacePress() {
         const time = Date.now();
-        console.log(this.grid);
-        if (!this.grid.started && this.grid.place === 0) {
-            this.grid.generateGrid();
-            this.grid.started = true;
-        }
+        if (!this.grid) return;
 
         const current = this.grid.set[this.grid.place];
+        if (!current) return;
+
         const difference = Math.abs(current.start - time);
-        console.log(`You hit at ${time} when grid was expecting ${current.start}`);
-        console.log(`This is a difference of ${difference}`);
+        if (this.isRest) {
+            this.grid.mistake();
+            this.clearRestTimeout();
+            return;
+        }
+
         if (difference > this.grid.buffer) {
             this.grid.mistake();
-            console.log("MISTAKE");
         } else {
             this.grid.next();
-            if (this.grid.place >= this.grid.set.length) {
+            if (this.grid.completed) {
                 this.generateNewBar();
             }
+        }
+    }
+
+    startRestTimeout(currentNote) {
+        const restDuration = currentNote.duration * (60000 / this.gridBpm);
+        this.restTimeout = setTimeout(() => {
+            this.grid.next();
+            if (this.grid.completed) {
+                this.generateNewBar();
+            }
+        }, restDuration);
+    }
+
+    clearRestTimeout() {
+        if (this.restTimeout) {
+            clearTimeout(this.restTimeout);
+            this.restTimeout = null;
         }
     }
 }

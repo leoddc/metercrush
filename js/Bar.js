@@ -44,6 +44,7 @@ class Bar {
     engrave(divId) {
         const VF = Vex.Flow;
         const div = document.getElementById(divId);
+        div.innerHTML = "";
         const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
 
         renderer.resize(500, 200);

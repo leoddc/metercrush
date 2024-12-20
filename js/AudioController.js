@@ -19,7 +19,7 @@ class Metronome {
         this.visualizer = document.getElementById("metronome-visualizer");
         this.on = false;
         this.lastHit = null;
-        this.interval = setInterval(() => this.onHit(), (this.quarterNoteTime) * 1000);
+        this.interval = setInterval(() => this.onHit(), this.quarterNoteTime * 1000);
     }
 
     onHit() {
@@ -44,24 +44,18 @@ class Metronome {
 }
 
 class Grid {
-    constructor(bar, bpm) {
+    constructor(bar, bpm, metronome, audioController) {
         this.bar = bar;
         this.notes = this.bar.notes;
         this.set = [];
-        this.buffer = 500; // milliseconds
+        this.buffer = 5000; // milliseconds
         this.completed = false;
         this.started = false;
         this.place = 0;
         this.hitting = false;
-        this.wholeFactor = (240 / bpm) * 1000; // the length of a whole note in milliseconds (60 / bpm * 4)
-        this.audioController = new AudioController(window.AudioContext);
-        this.metronome = new Metronome(bpm, () => {
-            if (this.completed) {
-                console.log("completed");
-            }
-            this.audioController.playClick();
-            console.log("metronome hit", this.place);
-        });
+        this.wholeFactor = (240 / bpm) * 1000; // length of a whole note in ms
+        this.audioController = audioController;
+        this.metronome = metronome;
     }
 
     next() {
@@ -69,7 +63,6 @@ class Grid {
         if (this.place === this.set.length) {
             this.completed = true;
         }
-
     }
 
     mistake() {
@@ -78,20 +71,16 @@ class Grid {
         this.set = [];
     }
 
-    checkDistance(start, end) {
-        const duration = end - start;
-    }
-
     noteDifferential(note) {
-        return this.wholeFactor * note.toFloat()
+        return this.wholeFactor * note.toFloat();
     }
 
     generateGrid() {
+        this.completed = false;
         if (!this.metronome.on) {
             this.metronome.start();
         }
         const metStart = this.metronome.lastHit;
-
         let lastTime = metStart;
 
         this.notes.forEach(note => {
@@ -99,7 +88,7 @@ class Grid {
                 start: lastTime,
                 end: lastTime + this.noteDifferential(note),
                 quiet: note.isRest
-            }
+            };
             this.set.push(block);
             lastTime = block.end;
         });
